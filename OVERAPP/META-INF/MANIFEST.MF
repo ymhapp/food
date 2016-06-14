@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OVERAPP
+Bundle-SymbolicName: OVERAPP
+Bundle-Version: 1.0.0.qualifier
+Export-Package: com.baidu.mapapi.overlayutil,
+ com.example.overapp
