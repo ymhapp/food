@@ -1,0 +1,30 @@
+[
+    {
+        "merged": "C:\\Users\\Administrator\\Desktop\\OVERAPP\\app\\build\\intermediates\\res\\merged\\debug\\drawable-ldpi-v4\\start_press.png",
+        "source": "C:\\Users\\Administrator\\Desktop\\OVERAPP\\app\\src\\main\\res\\drawable-ldpi\\start_press.png"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\Desktop\\OVERAPP\\app\\build\\intermediates\\res\\merged\\debug\\drawable-ldpi-v4\\lbs_mark.png",
+        "source": "C:\\Users\\Administrator\\Desktop\\OVERAPP\\app\\src\\main\\res\\drawable-ldpi\\lbs_mark.png"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\Desktop\\OVERAPP\\app\\build\\intermediates\\res\\merged\\debug\\drawable-ldpi-v4\\start.png",
+        "source": "C:\\Users\\Administrator\\Desktop\\OVERAPP\\app\\src\\main\\res\\drawable-ldpi\\start.png"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\Desktop\\OVERAPP\\app\\build\\intermediates\\res\\merged\\debug\\drawable-ldpi-v4\\logo.png",
+        "source": "C:\\Users\\Administrator\\Desktop\\OVERAPP\\app\\src\\main\\res\\drawable-ldpi\\logo.png"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\Desktop\\OVERAPP\\app\\build\\intermediates\\res\\merged\\debug\\drawable-ldpi-v4\\button.png",
+        "source": "C:\\Users\\Administrator\\Desktop\\OVERAPP\\app\\src\\main\\res\\drawable-ldpi\\button.png"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\Desktop\\OVERAPP\\app\\build\\intermediates\\res\\merged\\debug\\drawable-ldpi-v4\\go.png",
+        "source": "C:\\Users\\Administrator\\Desktop\\OVERAPP\\app\\src\\main\\res\\drawable-ldpi\\go.png"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\Desktop\\OVERAPP\\app\\build\\intermediates\\res\\merged\\debug\\drawable-ldpi-v4\\button_press.png",
+        "source": "C:\\Users\\Administrator\\Desktop\\OVERAPP\\app\\src\\main\\res\\drawable-ldpi\\button_press.png"
+    }
+]

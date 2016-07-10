@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 边框颜色值 -->
+    <item>
+        <shape>
+            <solid android:color="#01d3ae"/>
+        </shape>
+    </item>
+    <!-- 主体背景颜色值  在item中的top与bottom各指定了1dp的边框线-->
+    <item android:top="3dp" android:bottom="3dp" android:left="3dp" android:right="3dp">
+        <shape>
+            <solid android:color="#ffffff"/>
+        </shape>
+        //可以加padding属性，是该组件内容距该组件边框的填充区域
+        <padding android:bottom="10dp" android:left="10dp" android:right="10dp" android:top="10dp" />
+    </item>
+</layer-list>
