@@ -1,32 +1,33 @@
 package com.example.overapp;
 
-import android.R.string;
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
-
 import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baidu.location.BDLocation;
+import com.baidu.location.BDLocationListener;
+import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.InfoWindow;
-import com.baidu.mapapi.map.MapPoi;
-import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.MyLocationConfiguration;
+import com.baidu.mapapi.map.MyLocationConfiguration.LocationMode;
+import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
-import com.baidu.mapapi.overlayutil.BikingRouteOverlay;
-import com.baidu.mapapi.overlayutil.DrivingRouteOverlay;
-import com.baidu.mapapi.overlayutil.OverlayManager;
-import com.baidu.mapapi.overlayutil.TransitRouteOverlay;
-import com.baidu.mapapi.overlayutil.WalkingRouteOverlay;
 import com.baidu.mapapi.search.core.RouteLine;
 import com.baidu.mapapi.search.core.SearchResult;
 import com.baidu.mapapi.search.route.BikingRouteLine;
@@ -44,22 +45,36 @@ import com.baidu.mapapi.search.route.TransitRouteResult;
 import com.baidu.mapapi.search.route.WalkingRouteLine;
 import com.baidu.mapapi.search.route.WalkingRoutePlanOption;
 import com.baidu.mapapi.search.route.WalkingRouteResult;
+import com.example.overapp.MyOrientationListener.OnOrientationListener;
+import com.overlayutil.BikingRouteOverlay;
+import com.overlayutil.DrivingRouteOverlay;
+import com.overlayutil.OverlayManager;
+import com.overlayutil.TransitRouteOverlay;
+import com.overlayutil.WalkingRouteOverlay;
 
-/**
- * 此demo用来展示如何进行驾车、步行、公交路线搜索并在地图使用RouteOverlay、TransitOverlay绘制
- * 同时展示如何进行节点浏览并弹出泡泡
- */
-public class Routeplan extends Activity implements
-		BaiduMap.OnMapClickListener, OnGetRoutePlanResultListener {
-	// 地图当前状态
-	private MapStatus mMapStatus;
-	// 地图将要变化成的状态
-	private MapStatusUpdate mMapStatusUpdate;
-	MapView mMapView = null; // 地图View
-	BaiduMap mBaidumap = null;
-	
-	
-	
+public class Routeplan extends Activity implements OnGetRoutePlanResultListener {
+	private MapView mMapView;
+	private BaiduMap mBaiduMap;
+
+	private Context context;
+
+	// ��λ���
+	private LocationClient mLocationClient;
+	private MyLocationListener mLocationListener;
+	private boolean isFirstIn = true;
+	private double mLatitude;
+	private double mLongtitude;
+	// �Զ��嶨λͼ��
+	private BitmapDescriptor mIconLocation;
+	private MyOrientationListener myOrientationListener;
+	private float mCurrentX;
+	private LocationMode mLocationMode;
+
+	// ���������
+	private BitmapDescriptor mMarker;
+	private RelativeLayout mMarkerLy;
+
+
 	// 浏览路线节点相关
 	Button mBtnPre = null; // 上一个节点
 	Button mBtnNext = null; // 下一个节点
@@ -74,8 +89,9 @@ public class Routeplan extends Activity implements
 
 	// 搜索相关
 	RoutePlanSearch mSearch = null; // 搜索模块，也可去掉地图模块独立使用
-
-	protected void onCreate(Bundle savedInstanceState) {
+	@Override
+	protected void onCreate(Bundle savedInstanceState)
+	{
 		super.onCreate(savedInstanceState);
 		SDKInitializer.initialize(getApplicationContext());
 		setContentView(R.layout.activity_routeplan);
@@ -91,31 +107,71 @@ public class Routeplan extends Activity implements
 
 		Log.i("获取的纬度是", strLatitude);
 		Log.i("获取的经度是", strLongtitude);
+		this.context = this;
 
-
-		
 		CharSequence titleLable = "路线规划功能";
 		setTitle(titleLable);
 		// 初始化地图
-		mMapView = (MapView) findViewById(R.id.map);
-		mBaidumap = mMapView.getMap();
+		mMapView = (MapView) findViewById(R.id.id_bmapView);
+		mBaiduMap = mMapView.getMap();
 		mBtnPre = (Button) findViewById(R.id.pre);
 		mBtnNext = (Button) findViewById(R.id.next);
 		mBtnPre.setVisibility(View.INVISIBLE);
 		mBtnNext.setVisibility(View.INVISIBLE);
-		// 地图点击事件处理
-		mBaidumap.setOnMapClickListener(this);
+
 		// 初始化搜索模块，注册事件监听
 		mSearch = RoutePlanSearch.newInstance();
 		mSearch.setOnGetRoutePlanResultListener(this);
 
 		//
 
+
+		initView();
+		// ��ʼ����λ
+		initLocation();
+	}
+
+	private void initLocation()
+	{
+		mLocationMode = LocationMode.NORMAL;
+		mLocationClient = new LocationClient(this);
+		mLocationListener = new MyLocationListener();
+		mLocationClient.registerLocationListener(mLocationListener);
+
+		LocationClientOption option = new LocationClientOption();
+		option.setCoorType("bd09ll");
+		option.setIsNeedAddress(true);
+		option.setOpenGps(true);
+		option.setScanSpan(1000);
+		mLocationClient.setLocOption(option);
+		// ��ʼ��ͼ��
+		mIconLocation = BitmapDescriptorFactory
+				.fromResource(R.drawable.jiantou);
+		myOrientationListener = new MyOrientationListener(context);
+
+		myOrientationListener
+				.setOnOrientationListener(new OnOrientationListener()
+				{
+					@Override
+					public void onOrientationChanged(float x)
+					{
+						mCurrentX = x;
+					}
+				});
+
+	}
+
+	private void initView()
+	{
+		mMapView = (MapView) findViewById(R.id.id_bmapView);
+		mBaiduMap = mMapView.getMap();
+		MapStatusUpdate msu = MapStatusUpdateFactory.zoomTo(17.0f);
+		mBaiduMap.setMapStatus(msu);
 	}
 
 	/**
 	 * 发起路线规划搜索示例
-	 * 
+	 *
 	 * @param v
 	 */
 	public void searchButtonProcess(View v) {
@@ -123,7 +179,7 @@ public class Routeplan extends Activity implements
 		route = null;
 		mBtnPre.setVisibility(View.INVISIBLE);
 		mBtnNext.setVisibility(View.INVISIBLE);
-		mBaidumap.clear();
+		mBaiduMap.clear();
 		// 处理搜索按钮响应
 		EditText editSt = (EditText) findViewById(R.id.start);
 		EditText editEn = (EditText) findViewById(R.id.end);
@@ -151,7 +207,7 @@ public class Routeplan extends Activity implements
 
 	/**
 	 * 节点浏览示例
-	 * 
+	 *
 	 * @param v
 	 */
 	public void nodeClick(View v) {
@@ -201,13 +257,13 @@ public class Routeplan extends Activity implements
 			return;
 		}
 		// 移动节点至中心
-		mBaidumap.setMapStatus(MapStatusUpdateFactory.newLatLng(nodeLocation));
+		mBaiduMap.setMapStatus(MapStatusUpdateFactory.newLatLng(nodeLocation));
 		// show popup
 		popupText = new TextView(Routeplan.this);
 		popupText.setBackgroundResource(R.drawable.popup);
 		popupText.setTextColor(0xFF000000);
 		popupText.setText(nodeTitle);
-		mBaidumap.showInfoWindow(new InfoWindow(popupText, nodeLocation, 0));
+		mBaiduMap.showInfoWindow(new InfoWindow(popupText, nodeLocation, 0));
 
 	}
 
@@ -237,7 +293,7 @@ public class Routeplan extends Activity implements
 		super.onRestoreInstanceState(savedInstanceState);
 	}
 
-	@Override
+
 	public void onGetWalkingRouteResult(WalkingRouteResult result) {
 		if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
 			Toast.makeText(Routeplan.this, "抱歉，未找到结果", Toast.LENGTH_SHORT)
@@ -253,8 +309,8 @@ public class Routeplan extends Activity implements
 			mBtnPre.setVisibility(View.VISIBLE);
 			mBtnNext.setVisibility(View.VISIBLE);
 			route = result.getRouteLines().get(0);
-			WalkingRouteOverlay overlay = new MyWalkingRouteOverlay(mBaidumap);
-			mBaidumap.setOnMarkerClickListener(overlay);
+			WalkingRouteOverlay overlay = new MyWalkingRouteOverlay(mBaiduMap);
+			mBaiduMap.setOnMarkerClickListener(overlay);
 			routeOverlay = overlay;
 			overlay.setData(result.getRouteLines().get(0));
 			overlay.addToMap();
@@ -263,7 +319,7 @@ public class Routeplan extends Activity implements
 
 	}
 
-	@Override
+
 	public void onGetTransitRouteResult(TransitRouteResult result) {
 
 		if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
@@ -280,8 +336,8 @@ public class Routeplan extends Activity implements
 			mBtnPre.setVisibility(View.VISIBLE);
 			mBtnNext.setVisibility(View.VISIBLE);
 			route = result.getRouteLines().get(0);
-			TransitRouteOverlay overlay = new MyTransitRouteOverlay(mBaidumap);
-			mBaidumap.setOnMarkerClickListener(overlay);
+			TransitRouteOverlay overlay = new MyTransitRouteOverlay(mBaiduMap);
+			mBaiduMap.setOnMarkerClickListener(overlay);
 			routeOverlay = overlay;
 			overlay.setData(result.getRouteLines().get(0));
 			overlay.addToMap();
@@ -289,7 +345,7 @@ public class Routeplan extends Activity implements
 		}
 	}
 
-	@Override
+
 	public void onGetDrivingRouteResult(DrivingRouteResult result) {
 		if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
 			Toast.makeText(Routeplan.this, "抱歉，未找到结果", Toast.LENGTH_SHORT)
@@ -305,16 +361,16 @@ public class Routeplan extends Activity implements
 			mBtnPre.setVisibility(View.VISIBLE);
 			mBtnNext.setVisibility(View.VISIBLE);
 			route = result.getRouteLines().get(0);
-			DrivingRouteOverlay overlay = new MyDrivingRouteOverlay(mBaidumap);
+			DrivingRouteOverlay overlay = new MyDrivingRouteOverlay(mBaiduMap);
 			routeOverlay = overlay;
-			mBaidumap.setOnMarkerClickListener(overlay);
+			mBaiduMap.setOnMarkerClickListener(overlay);
 			overlay.setData(result.getRouteLines().get(0));
 			overlay.addToMap();
 			overlay.zoomToSpan();
 		}
 	}
 
-	@Override
+
 	public void onGetBikingRouteResult(BikingRouteResult bikingRouteResult) {
 		if (bikingRouteResult == null
 				|| bikingRouteResult.error != SearchResult.ERRORNO.NO_ERROR) {
@@ -331,9 +387,9 @@ public class Routeplan extends Activity implements
 			mBtnPre.setVisibility(View.VISIBLE);
 			mBtnNext.setVisibility(View.VISIBLE);
 			route = bikingRouteResult.getRouteLines().get(0);
-			BikingRouteOverlay overlay = new MyBikingRouteOverlay(mBaidumap);
+			BikingRouteOverlay overlay = new MyBikingRouteOverlay(mBaiduMap);
 			routeOverlay = overlay;
-			mBaidumap.setOnMarkerClickListener(overlay);
+			mBaiduMap.setOnMarkerClickListener(overlay);
 			overlay.setData(bikingRouteResult.getRouteLines().get(0));
 			overlay.addToMap();
 			overlay.zoomToSpan();
@@ -433,33 +489,110 @@ public class Routeplan extends Activity implements
 
 	}
 
-	@Override
-	public void onMapClick(LatLng point) {
-		mBaidumap.hideInfoWindow();
-	}
 
 	@Override
-	public boolean onMapPoiClick(MapPoi poi) {
-		return false;
-	}
-
-	@Override
-	protected void onPause() {
-		mMapView.onPause();
-		super.onPause();
-	}
-
-	@Override
-	protected void onResume() {
-		mMapView.onResume();
+	protected void onResume()
+	{
 		super.onResume();
+		// ��activityִ��onResumeʱִ��mMapView. onResume ()��ʵ�ֵ�ͼ�������ڹ���
+		mMapView.onResume();
 	}
 
 	@Override
-	protected void onDestroy() {
-		mSearch.destroy();
-		mMapView.onDestroy();
+	protected void onStart()
+	{
+		super.onStart();
+		// ������λ
+		mBaiduMap.setMyLocationEnabled(true);
+		if (!mLocationClient.isStarted())
+			mLocationClient.start();
+		// �������򴫸���
+		myOrientationListener.start();
+	}
+
+	@Override
+	protected void onPause()
+	{
+		super.onPause();
+		// ��activityִ��onDestroyʱִ��mMapView.onDestroy()��ʵ�ֵ�ͼ�������ڹ���
+		mMapView.onPause();
+	}
+
+	@Override
+	protected void onStop()
+	{
+		super.onStop();
+
+		// ֹͣ��λ
+		mBaiduMap.setMyLocationEnabled(false);
+		mLocationClient.stop();
+		// ֹͣ���򴫸���
+		myOrientationListener.stop();
+
+	}
+
+	@Override
+	protected void onDestroy()
+	{
 		super.onDestroy();
+		// ��activityִ��onDestroyʱִ��mMapView.onDestroy()��ʵ�ֵ�ͼ�������ڹ���
+		mMapView.onDestroy();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+
+
+
+	/**
+	 * ��λ���ҵ�λ��
+	 */
+	private void centerToMyLocation()
+	{
+		LatLng latLng = new LatLng(mLatitude, mLongtitude);
+		MapStatusUpdate msu = MapStatusUpdateFactory.newLatLng(latLng);
+		mBaiduMap.animateMapStatus(msu);
+	}
+
+	private class MyLocationListener implements BDLocationListener
+	{
+		@Override
+		public void onReceiveLocation(BDLocation location)
+		{
+
+			MyLocationData data = new MyLocationData.Builder()//
+					.direction(mCurrentX)//
+					.accuracy(location.getRadius())//
+					.latitude(location.getLatitude())//
+					.longitude(location.getLongitude())//
+					.build();
+			mBaiduMap.setMyLocationData(data);
+			// �����Զ���ͼ��
+			MyLocationConfiguration config = new MyLocationConfiguration(
+					mLocationMode, true, mIconLocation);
+			mBaiduMap.setMyLocationConfigeration(config);
+
+			// ���¾�γ��
+			mLatitude = location.getLatitude();
+			mLongtitude = location.getLongitude();
+
+			if (isFirstIn)
+			{
+				LatLng latLng = new LatLng(location.getLatitude(),
+						location.getLongitude());
+				MapStatusUpdate msu = MapStatusUpdateFactory.newLatLng(latLng);
+				mBaiduMap.animateMapStatus(msu);
+				isFirstIn = false;
+
+				Toast.makeText(context, location.getAddrStr(),
+						Toast.LENGTH_SHORT).show();
+			}
+
+		}
 	}
 
 }

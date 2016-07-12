@@ -1,4 +1,4 @@
-package com.baidu.mapapi.overlayutil;
+package com.overlayutil;
 
 import android.os.Bundle;
 
@@ -80,7 +80,7 @@ public class PoiOverlay extends OverlayManager {
      * 
      * @param i
      *            被点击的poi在
-     *            {@link com.baidu.mapapi.search.poi.PoiResult#getAllPoi()} 中的索引
+     *            {@link PoiResult#getAllPoi()} 中的索引
      * @return
      */
     public boolean onPoiClick(int i) {

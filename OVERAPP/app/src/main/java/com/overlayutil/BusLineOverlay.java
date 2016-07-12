@@ -1,4 +1,4 @@
-package com.baidu.mapapi.overlayutil;
+package com.overlayutil;
 
 import android.graphics.Color;
 import android.util.Log;
@@ -79,7 +79,7 @@ public class BusLineOverlay extends OverlayManager {
      * 
      * @param index
      *            被点击的站点在
-     *            {@link com.baidu.mapapi.search.busline.BusLineResult#getStations()}
+     *            {@link BusLineResult#getStations()}
      *            中的索引
      * @return 是否处理了该点击事件
      */

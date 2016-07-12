@@ -1,16 +1,26 @@
 package com.example.overapp;
 
-import com.baidu.mapapi.map.InfoWindow.OnInfoWindowClickListener;
-import com.baidu.mapapi.map.InfoWindow;
-
-import java.security.PublicKey;
-import java.util.List;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
-import com.baidu.location.LocationClientOption.LocationMode;
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.cloud.CloudListener;
 import com.baidu.mapapi.cloud.CloudManager;
@@ -19,13 +29,11 @@ import com.baidu.mapapi.cloud.CloudSearchResult;
 import com.baidu.mapapi.cloud.DetailSearchResult;
 import com.baidu.mapapi.cloud.NearbySearchInfo;
 import com.baidu.mapapi.map.BaiduMap;
-import com.baidu.mapapi.map.BaiduMap.OnMapClickListener;
 import com.baidu.mapapi.map.BaiduMap.OnMarkerClickListener;
-import com.baidu.mapapi.map.InfoWindow.OnInfoWindowClickListener;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.InfoWindow;
-import com.baidu.mapapi.map.MapPoi;
+import com.baidu.mapapi.map.InfoWindow.OnInfoWindowClickListener;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
@@ -35,21 +43,13 @@ import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.OverlayOptions;
-import com.baidu.mapapi.map.SupportMapFragment;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.model.LatLngBounds;
 import com.baidu.mapapi.model.LatLngBounds.Builder;
-import com.baidu.mapapi.model.inner.GeoPoint;
-import com.baidu.mapapi.overlayutil.PoiOverlay;
 
 import com.baidu.mapapi.search.core.CityInfo;
 import com.baidu.mapapi.search.core.PoiInfo;
 import com.baidu.mapapi.search.core.SearchResult;
-import com.baidu.mapapi.search.geocode.GeoCodeResult;
-import com.baidu.mapapi.search.geocode.GeoCoder;
-import com.baidu.mapapi.search.geocode.OnGetGeoCoderResultListener;
-import com.baidu.mapapi.search.geocode.ReverseGeoCodeOption;
-import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
 import com.baidu.mapapi.search.poi.OnGetPoiSearchResultListener;
 import com.baidu.mapapi.search.poi.PoiCitySearchOption;
 import com.baidu.mapapi.search.poi.PoiDetailResult;
@@ -60,32 +60,9 @@ import com.baidu.mapapi.search.sug.OnGetSuggestionResultListener;
 import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
-
-import com.example.overapp.MyOrientationListener;
 import com.example.overapp.MyOrientationListener.OnOrientationListener;
 
-import android.support.v7.app.ActionBarActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Paint;
-import android.media.session.MediaController;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.OrientationListener;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.Window;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
+import java.util.List;
 
 public class MainActivity extends ActionBarActivity implements CloudListener,
 		OnGetPoiSearchResultListener, OnGetSuggestionResultListener {
@@ -96,6 +73,8 @@ public class MainActivity extends ActionBarActivity implements CloudListener,
 	// MARKER
 	private InfoWindow mInfoWindow;
 	private BitmapDescriptor bitmap;
+	private RelativeLayout mMarkerLy;
+
 	// 存储LBS数据库的遍历结果
 	List<CloudPoiInfo> poiList2;
 	// poi相关
@@ -168,23 +147,23 @@ public class MainActivity extends ActionBarActivity implements CloudListener,
 		// 初始化覆盖物
 		initOverlay();
 		mBaiduMap.setOnMarkerClickListener(new OnMarkerClickListener() {
+			//点击marker
 			public boolean onMarkerClick(final Marker marker) {
 				// 获取marker的经纬度
 				LatLng position = marker.getPosition();
 				double marklat = position.latitude;
 				double emarklot = position.longitude;
+				//遍历LBS中的marker
 				for (CloudPoiInfo cpi : poiList2) {
 					if (cpi.latitude == marklat && cpi.longitude == emarklot)
 						Toast.makeText(MainActivity.this, cpi.address,
 								Toast.LENGTH_LONG).show();
-
 				}
-
 				Button button = new Button(getApplicationContext());
 				button.setBackgroundResource(R.drawable.markselector);
-				OnInfoWindowClickListener listener = null;
 				button.setFocusable(true);
-				button.setOnClickListener(new OnClickListener() {
+				//GO button的监听
+				button.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
 						// Intent intent = new Intent();
 						// intent.setClass(MainActivity.this,
@@ -193,27 +172,25 @@ public class MainActivity extends ActionBarActivity implements CloudListener,
 					}
 				});
 
-				listener = new OnInfoWindowClickListener() {
+				OnInfoWindowClickListener oinfolistener = null;
+				oinfolistener= new OnInfoWindowClickListener() {
 					public void onInfoWindowClick() {
 						// 点击button跳转到导航页面
-
 						Intent intent = new Intent();
 						intent.setClass(MainActivity.this,
-								Routeplan.class);
+								Introduce.class);
 						// 用Bundle携带数据
 						Bundle bundle = new Bundle();
-
 						// 将参数mLatitude传递给Latitude
 						bundle.putDouble("Latitude", mLatitude);
 						bundle.putDouble("Longtitude", mLongtitude);
-
 						intent.putExtras(bundle);
 						startActivity(intent);
 					}
 				};
 				LatLng ll = marker.getPosition();
 				mInfoWindow = new InfoWindow(BitmapDescriptorFactory
-						.fromView(button), ll, -47, listener);
+						.fromView(button), ll, -47, oinfolistener);
 				mBaiduMap.showInfoWindow(mInfoWindow);
 				return true;
 			}
@@ -224,37 +201,33 @@ public class MainActivity extends ActionBarActivity implements CloudListener,
 		 */
 		keyWorldsView.addTextChangedListener(new TextWatcher() {
 
-			@Override
-			public void afterTextChanged(Editable arg0) {
+												 @Override
+												 public void afterTextChanged(Editable arg0) {
 
-			}
+												 }
 
-			@Override
-			public void beforeTextChanged(CharSequence arg0, int arg1,
-					int arg2, int arg3) {
+												 @Override
+												 public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
 
-			}
+												 }
 
-			@Override
-			public void onTextChanged(CharSequence cs, int arg1, int arg2,
-					int arg3) {
-				if (cs.length() <= 0) {
-					return;
-				}
-				String city = ((EditText) findViewById(R.id.city)).getText()
-						.toString();
-				/**
-				 * 使用建议搜索服务获取建议列表，结果在onSuggestionResult()中更新
-				 */
-				mSuggestionSearch
-						.requestSuggestion((new SuggestionSearchOption())
-								.keyword(cs.toString()).city(city));
-			}
-		});
+												 @Override
+												 public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+													 if (cs.length() <= 0) {
+														 return;
+													 }
+													 String city = ((EditText) findViewById(R.id.city)).getText().toString();
+													 /**
+													  * 使用建议搜索服务获取建议列表，结果在onSuggestionResult()中更新
+													  */
+													 mSuggestionSearch.requestSuggestion((new SuggestionSearchOption())
+															 .keyword(cs.toString()).city(city));
+												 }
+											 }
+		);
 
 		// 初始化定位
 		initLocation();
-
 	}
 
 	/**
@@ -335,32 +308,32 @@ public class MainActivity extends ActionBarActivity implements CloudListener,
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		switch (item.getItemId()) {
-		// 普通地图
-		case R.id.map_common:
-			mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);
-			break;
-		// 卫星地图
-		case R.id.map_site:
-			mBaiduMap.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
-			break;
-		// 交通图
-		case R.id.map_traffic:
-			if (mBaiduMap.isTrafficEnabled()) {
-				mBaiduMap.setTrafficEnabled(false);
-				item.setTitle("实时交通(off)");
-			} else {
-				mBaiduMap.setTrafficEnabled(true);
-				item.setTitle("实时交通(on)");
-			}
-			break;
-		// 回到我的位置
-		case R.id.map_location:
-			centerToMyLocation();
-			break;
-		// 搜索附近美食
-		case R.id.map_food:
-			searchfood();
-			break;
+			// 普通地图
+			case R.id.map_common:
+				mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);
+				break;
+			// 卫星地图
+			case R.id.map_site:
+				mBaiduMap.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
+				break;
+			// 交通图
+			case R.id.map_traffic:
+				if (mBaiduMap.isTrafficEnabled()) {
+					mBaiduMap.setTrafficEnabled(false);
+					item.setTitle("实时交通(off)");
+				} else {
+					mBaiduMap.setTrafficEnabled(true);
+					item.setTitle("实时交通(on)");
+				}
+				break;
+			// 回到我的位置
+			case R.id.map_location:
+				centerToMyLocation();
+				break;
+			// 搜索附近美食
+			case R.id.map_food:
+				searchfood();
+				break;
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -377,6 +350,14 @@ public class MainActivity extends ActionBarActivity implements CloudListener,
 		myOrientationListener.start();
 	}
 
+	protected void onStop() {
+		super.onStop();
+		// 停止定位
+		mBaiduMap.setMyLocationEnabled(false);
+		mLocationClient.stop();
+		// 停止方向传感
+		myOrientationListener.stop();
+	}
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -398,19 +379,12 @@ public class MainActivity extends ActionBarActivity implements CloudListener,
 		mMapView.onPause();
 	}
 
-	protected void onStop() {
-		super.onStop();
-		// 停止定位
-		mBaiduMap.setMyLocationEnabled(false);
-		mLocationClient.stop();
-		// 停止方向传感
-		myOrientationListener.stop();
-	}
+
 
 	/**
 	 * 实现定位接口的方法
-	 * 
-	 * @param poiList
+	 *
+	 * @param
 	 */
 	public class MyLocationListener implements BDLocationListener {
 
@@ -429,7 +403,7 @@ public class MainActivity extends ActionBarActivity implements CloudListener,
 
 			MyLocationData locData = new MyLocationData.Builder()
 
-			.direction(mCurrentX)//
+					.direction(mCurrentX)//
 					.accuracy(location.getRadius())//
 					.latitude(location.getLatitude())//
 					.longitude(location.getLongitude())//
@@ -459,7 +433,6 @@ public class MainActivity extends ActionBarActivity implements CloudListener,
 
 	/**
 	 * 将获取到的遍历集合存到str
-	 * 
 	 */
 
 	public String getAddress(List<CloudPoiInfo> poiList) {
@@ -473,8 +446,8 @@ public class MainActivity extends ActionBarActivity implements CloudListener,
 
 	/**
 	 * 实现LBS搜索的两个方法，获取回调信息
-	 * 
-	 * @param poiList
+	 *
+	 * @param
 	 */
 	@Override
 	public void onGetDetailSearchResult(DetailSearchResult arg0, int arg1) {
@@ -523,7 +496,7 @@ public class MainActivity extends ActionBarActivity implements CloudListener,
 
 	/**
 	 * 影响搜索按钮点击事件
-	 * 
+	 *
 	 * @param v
 	 */
 	public void searchButtonProcess(View v) {
