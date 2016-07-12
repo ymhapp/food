@@ -6,12 +6,22 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Introduce extends AppCompatActivity {
     private Button btn_go;
     private double mLatitude;
     private double mLongtitude;
-
+    private ListView listView;
+    private SimpleAdapter simple_adapter;
+    private List<Map<String, Object>> dataList;
+    private int i = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,5 +57,25 @@ public class Introduce extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        //
+        listView = (ListView) findViewById(R.id.listView);
+        dataList = new ArrayList<Map<String, Object>>();
+        simple_adapter = new SimpleAdapter(Introduce.this, getData(), R.layout.list_item,
+                new String[]{"pic", "text"}, new int[]{R.id.pic, R.id.text});
+
+        listView.setAdapter(simple_adapter);
     }
+    public List<Map<String, Object>> getData() {
+        for(int i=0;i<20;i++){
+            Map<String,Object>map=new HashMap<String,Object>();
+            map.put("pic",R.drawable.ic_launcher);
+            map.put("text","鸡腿套餐"+i);
+            dataList.add(map);
+
+
+        }
+        return dataList;
+    }
+
 }
