@@ -1,0 +1,10 @@
+CHANGED,C:\Users\Administrator\Desktop\OVERAPP\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\android\tools\fd\runtime\AppPatchesLoaderImpl.class
+CHANGED,C:\Users\Administrator\Desktop\OVERAPP\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\example\overapp\MainActivity$MyLocationListener$override.class
+CHANGED,C:\Users\Administrator\Desktop\OVERAPP\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\example\overapp\MainActivity$1$override.class
+CHANGED,C:\Users\Administrator\Desktop\OVERAPP\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\example\overapp\MainActivity$MyPoiOverlay$override.class
+CHANGED,C:\Users\Administrator\Desktop\OVERAPP\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\example\overapp\MainActivity$override.class
+CHANGED,C:\Users\Administrator\Desktop\OVERAPP\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\example\overapp\MainActivity$2$override.class
+CHANGED,C:\Users\Administrator\Desktop\OVERAPP\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\example\overapp\MainActivity$1$2$override.class
+CHANGED,C:\Users\Administrator\Desktop\OVERAPP\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\example\overapp\MainActivity$1$1$override.class
+CHANGED,C:\Users\Administrator\Desktop\OVERAPP\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\example\overapp\MainActivity$3$override.class
+CHANGED,C:\Users\Administrator\Desktop\OVERAPP\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\example\overapp\MainActivity$1$3$override.class
