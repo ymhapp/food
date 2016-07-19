@@ -73,7 +73,10 @@ import cn.bmob.v3.listener.FindListener;
 public class MainActivity extends ActionBarActivity implements CloudListener,
         OnGetPoiSearchResultListener, OnGetSuggestionResultListener {
     public static String TAG = "bmob";
+    private  String straddress;
+    private String strid;
     private String markAdress;
+    private String strshopname;
     // 存储当前定位信息
     public BDLocation currlocation = null;
 
@@ -163,46 +166,50 @@ public class MainActivity extends ActionBarActivity implements CloudListener,
                 LatLng position = marker.getPosition();
                 double marklat = position.latitude;
                 double emarklot = position.longitude;
-
+                CloudPoiInfo cpi=null;
                 //遍历LBS中的marker
-                for (CloudPoiInfo cpi : poiList2) {
-                    if (cpi.latitude == marklat && cpi.longitude == emarklot) {
-                        markAdress = cpi.address;
+                for (CloudPoiInfo cloudPoiInfo : poiList2) {
+                    if (cloudPoiInfo.latitude == marklat && cloudPoiInfo.longitude == emarklot) {
+                        cpi=cloudPoiInfo;
                         Toast.makeText(MainActivity.this, cpi.address, Toast.LENGTH_LONG).show();
-
                     }
 //                      Shop shop=getShopByLL(position.latitude,position.longitude);
 //                      List< com.com.overapp.model.Menu> shopMenus=getMenuByShop( shop.getId());
 //                     shop.setShopMenu(shopMenus);
                 }
-                    //  Bmob查询
-                    final BmobQuery<Shop> shopad = new BmobQuery<Shop>();
-                    //查询playerName叫“比目”的数据
-                    shopad.addWhereEqualTo("address",markAdress);
-                    //返回50条数据，如果不加上这条语句，默认返回10条数据
-                    shopad.setLimit(50);
-                    //执行查询方法
-                    shopad.findObjects(new FindListener<Shop>() {
-                        @Override
-                        public void done(List<Shop> list, BmobException e) {
-
-                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                            builder.setTitle("query address");
-                            String str = "";
-                            if (e == null) {
-                                //  log("查询成功：共"+list.size()+"条数据。");
-                                for (Shop shop : list) {
-                                    shop.getLatitude();
-                                    shop.getLongitude();
-                                    shop.getShopName();
-                                    str += shop.getShopName();
-                                }
-                                log("查询成功：共" + list + "条数据。");
+                if(cpi==null) {
+                    Intent intent = new Intent();
+                    intent.setClass(MainActivity.this, Routeplan.class);
+                    startActivity(intent);
+                }
+                //  Bmob查询
+                final BmobQuery<Shop> shopad = new BmobQuery<Shop>();
+                //查询地址与marker相同的店铺
+                System.out.print("address1:"+cpi.address);
+                shopad.addWhereEqualTo("address", cpi.address);
+                shopad.setLimit(1);
+                //执行查询方法
+                shopad.findObjects(new FindListener<Shop>() {
+                    @Override
+                    public void done(List<Shop> list, BmobException e) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                        builder.setTitle("query address");
+                        if (e == null&&list.size()!=0) {
+                            System.out.println("size1:"+list.get(0).getShopName());
+                            for (Shop shop : list) {
+//                                shop.getLatitude();
+//                                shop.getLongitude();
+//                                shop.getShopName();
+                                straddress=shop.getAddress();
+                                strid = shop.getObjectId();
+                                strshopname = shop.getShopName();
                             }
-                            builder.setMessage(str);
-                            builder.create().show();
                         }
-                    });
+
+                        builder.setMessage(strshopname);
+                        builder.create().show();
+                    }
+                });
 
                 Button button = new Button(getApplicationContext());
                 button.setBackgroundResource(R.drawable.markselector);
@@ -223,17 +230,19 @@ public class MainActivity extends ActionBarActivity implements CloudListener,
                         // 用Bundle携带数据
                         Bundle bundle = new Bundle();
                         // 将参数mLatitude传递给Latitude
-                        bundle.putDouble("Latitude", mLatitude);
-                        bundle.putDouble("Longtitude", mLongtitude);
+                        bundle.putString("shopid", strid);
+                        bundle.putString("shopname", strshopname);
+                        bundle.putString("shopad", straddress);
                         intent.putExtras(bundle);
                         startActivity(intent);
                     }
                 };
                 LatLng ll = marker.getPosition();
                 mInfoWindow = new InfoWindow(BitmapDescriptorFactory
-                        .fromView(button), ll, -47, oinfolistener);
+                        .fromView(button), ll, -50, oinfolistener);
                 mBaiduMap.showInfoWindow(mInfoWindow);
                 return true;
+
             }
         });
 

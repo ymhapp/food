@@ -3,7 +3,6 @@ package com.example.overapp;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -95,20 +94,9 @@ public class Routeplan extends Activity implements OnGetRoutePlanResultListener 
 		super.onCreate(savedInstanceState);
 		SDKInitializer.initialize(getApplicationContext());
 		setContentView(R.layout.activity_routeplan);
-
 		// 新页面接收数据
 		Bundle bundle = this.getIntent().getExtras();
-		// 接收经纬度
-		double Latitude = bundle.getDouble("Latitude");
-		double Longtitude = bundle.getDouble("Longtitude");
-
-		String strLatitude = Double.toString(Latitude);
-		String strLongtitude = Double.toString(Longtitude);
-
-		Log.i("获取的纬度是", strLatitude);
-		Log.i("获取的经度是", strLongtitude);
 		this.context = this;
-
 		CharSequence titleLable = "路线规划功能";
 		setTitle(titleLable);
 		// 初始化地图
@@ -122,10 +110,6 @@ public class Routeplan extends Activity implements OnGetRoutePlanResultListener 
 		// 初始化搜索模块，注册事件监听
 		mSearch = RoutePlanSearch.newInstance();
 		mSearch.setOnGetRoutePlanResultListener(this);
-
-		//
-
-
 		initView();
 		// ��ʼ����λ
 		initLocation();

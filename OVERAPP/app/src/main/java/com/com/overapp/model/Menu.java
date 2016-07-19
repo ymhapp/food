@@ -8,7 +8,7 @@ import cn.bmob.v3.BmobObject;
 public class Menu extends BmobObject {
 
     private String menuName;
-    private Double price;
+    private String price;
     private String url;
     private String shopId;
 
@@ -21,11 +21,11 @@ public class Menu extends BmobObject {
         this.menuName = menuName;
     }
 
-    public double getPrice() {
+    public String getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(String price) {
         this.price = price;
     }
 

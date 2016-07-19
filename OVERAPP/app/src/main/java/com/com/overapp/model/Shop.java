@@ -9,6 +9,15 @@ import cn.bmob.v3.BmobObject;
  * Created by Administrator on 2016/7/12.
  */
 public class Shop  extends BmobObject{
+private  String  address;
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
     private String shopName;
     private Double latitude;
